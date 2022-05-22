@@ -1,8 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const {
-    stdout
-} = process;
 
 function copyDir() {
 async function deleteFilesFromDirectory(p) {
@@ -10,7 +7,7 @@ async function deleteFilesFromDirectory(p) {
     .then(async (files) => {
         for await (let file of files) {
                 if (file.isDirectory()) {
-                    await fs.promises.rmdir(path.resolve(p, file.name), {recursive: true, force: true}, (err) => {
+                    await fs.promises.rm(path.resolve(p, file.name), {recursive: true, force: true}, (err) => {
                         if (err) throw err;
                     })        
                 } else {
@@ -47,7 +44,10 @@ async function createDirectory(current_path, primary_path) {
                     }
                 }
             })
-            .then(createBundle())
+            .then(() => {
+                createBundle();
+                readHTMLFile();
+            })
     })
 }
 
@@ -95,13 +95,11 @@ async function readHTMLFile() {
                         .then(async components => {
                             for (let component of components) {
                                 if (component.isFile() && path.extname(component.name) === '.html' && item.slice(2, -2) === component.name.slice(0, -5)) {
-                                    let component_data = '';
                                     const readStream = await fs.createReadStream(path.join(__dirname, 'components', component.name), 'utf-8');
                                     readStream.on('data', async chunk => {
-                                        component_data += await chunk;
+                                        outputHTML = await outputHTML.replace(item, chunk);
                                     })
                                     readStream.on('end', async () => {
-                                        outputHTML = await outputHTML.replace(item, component_data);
                                         let writeStream = await fs.createWriteStream(path.join(__dirname, 'project-dist', 'index.html'));
                                         writeStream.write(outputHTML)
                                     })
@@ -114,5 +112,6 @@ async function readHTMLFile() {
         }
     })
 }
-readHTMLFile()
+
+
 copyDir()
