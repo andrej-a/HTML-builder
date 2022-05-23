@@ -25,7 +25,7 @@ async function deleteFilesFromDirectory(p) {
 async function createDirectory(current_path, primary_path) {
     await fs.mkdir(current_path, {recursive: true}, (err) => {
         if (err) {
-            console.log(err);
+            createDirectory(current_path, primary_path);
         }
 
         fs.promises.readdir(primary_path, {
@@ -37,9 +37,9 @@ async function createDirectory(current_path, primary_path) {
                            await createDirectory(path.resolve(current_path, file.name), path.resolve(primary_path, file.name));
                     } else {
                       await fs.copyFile(path.resolve(primary_path, file.name), path.resolve(current_path, file.name), err => {
-                            if (err) {
-                                console.log(err);
-                            }
+                          if (err) {
+                              createDirectory(current_path, primary_path);
+                          }
                         });                        
                     }
                 }
