@@ -8,7 +8,9 @@ async function deleteFilesFromDirectory(p) {
         for await (let file of files) {
                 if (file.isDirectory()) {
                     await fs.promises.rm(path.resolve(p, file.name), {recursive: true, force: true}, (err) => {
-                        if (err) throw err;
+                        if (err) {
+                            copyDir();
+                        };
                     })        
                 } else {
                     await fs.promises.unlink(path.resolve(p, file.name), (err) => {
